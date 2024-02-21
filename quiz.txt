@@ -1,0 +1,98 @@
+import java.util.Scanner;
+import java.util.Timer;
+import java.util.TimerTask;
+
+class QuizQuestion {
+    String question;
+    String[] options;
+    int correctOptionIndex;
+
+    public QuizQuestion(String question, String[] options, int correctOptionIndex) {
+        this.question = question;
+        this.options = options;
+        this.correctOptionIndex = correctOptionIndex;
+    }
+}
+
+public class Quizapplication {
+    private static final int QUESTION_TIME_LIMIT = 30; // in seconds
+    private static int score = 0;
+    private static int currentQuestionIndex = 0;
+    private static QuizQuestion[] questions;
+    private static Timer timer;
+
+    public static void main(String[] args) {
+        initializeQuestions();
+        startQuiz();
+    }
+
+    private static void initializeQuestions() {
+        // Initialize quiz questions here
+        // Example:
+        questions = new QuizQuestion[]{
+                new QuizQuestion("What is the capital of France?", new String[]{"A. London", "B. Paris", "C. Rome", "D. Madrid"}, 1),
+                new QuizQuestion("What is the largest planet in our solar system?", new String[]{"A. Earth", "B. Jupiter", "C. Saturn", "D. Mars"}, 1),
+                new QuizQuestion("Which is the national fruit of India?", new String[]{"A. Mango", "B. Apple", "C. Pineapple", "D. Banana"}, 0)
+        };
+    }
+
+    private static void startQuiz() {
+        timer = new Timer();
+        displayNextQuestion();
+    }
+
+    private static void displayNextQuestion() {
+        if (currentQuestionIndex < questions.length) {
+            QuizQuestion currentQuestion = questions[currentQuestionIndex];
+            System.out.println("Question: " + currentQuestion.question);
+            for (String option : currentQuestion.options) {
+                System.out.println(option);
+            }
+            startTimer();
+            getUserAnswer();
+        } else {
+            endQuiz();
+        }
+    }
+
+    private static void startTimer() {
+        timer.schedule(new TimerTask() {
+            int timeLeft = QUESTION_TIME_LIMIT;
+
+            @Override
+            public void run() {
+                System.out.println("Time Left: " + timeLeft + " seconds");
+                timeLeft--;
+                if (timeLeft < 0) {
+                    timer.cancel();
+                    System.out.println("Time's up!");
+                    displayNextQuestion();
+                }
+            }
+        }, 0, 1000);
+    }
+
+    private static void getUserAnswer() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Your answer: ");
+        String userAnswer = scanner.nextLine().trim().toUpperCase();
+        int selectedOptionIndex = userAnswer.charAt(0) - 'A';
+
+        if (selectedOptionIndex == questions[currentQuestionIndex].correctOptionIndex) {
+            System.out.println("Correct!");
+            score++;
+        } else {
+            System.out.println("Incorrect! The correct answer is: " + questions[currentQuestionIndex].options[questions[currentQuestionIndex].correctOptionIndex]);
+        }
+
+        currentQuestionIndex++;
+        displayNextQuestion();
+    }
+
+    private static void endQuiz() {
+        timer.cancel();
+        System.out.println("Quiz ended!");
+        System.out.println("Your Score: " + score + "/" + questions.length);
+        // Display summary of correct/incorrect answers if needed
+    }
+}
